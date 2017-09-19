@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ -z $http_response_url ]; then
+  echo "Missing env.http_response_url setting"
+  exit 1;
+fi
+
+case $1 in
+    config)
+        echo "graph_title HTTP response time ${http_response_url}"
+        echo "graph_vlabel seconds"
+        echo "graph_category http_response"
+        echo "namelookup.label NameLookup"
+        echo "connect.label Connect"
+        echo "appconnect.label AppConnect"
+        echo "pretransfer.label PreTransfer"
+        echo "redirect.label Redirect"
+        echo "starttransfer.label StartTransfer"
+        echo "total.label Total"
+
+    exit 0;;
+esac
+
+# Fetch URL
+CURL=`curl -w %{time_namelookup}-%{time_connect}-%{time_appconnect}-%{time_pretransfer}-%{time_redirect}-%{time_starttransfer}-%{time_total} -o /dev/null -s $http_response_url`
+
+echo "namelookup.value $(echo $CURL | cut -f1 -d-)
+connect.value $(echo $CURL | cut -f2 -d-)
+appconnect.value $(echo $CURL | cut -f3 -d-)
+pretransfer.value $(echo $CURL | cut -f4 -d-)
+redirect.value $(echo $CURL | cut -f5 -d-)
+starttransfer.value $(echo $CURL | cut -f6 -d-)
+total.value $(echo $CURL | cut -f7 -d-)"
